@@ -4,5 +4,6 @@
     "documentation": "https://example.com",
     "dependencies": [],
     "codeowners": [],
-    "requirements": ["requests", "beautifulsoup4"]
+    "requirements": ["requests", "beautifulsoup4"],
+    "version": "0.1.0"
   }
