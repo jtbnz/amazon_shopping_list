@@ -4,3 +4,4 @@ amazon_shopping_list:
     items:
       description: "List of shopping items"
       example: "Milk, Bread"
+      
