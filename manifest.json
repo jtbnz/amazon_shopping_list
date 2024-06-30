@@ -1,0 +1,8 @@
+{
+    "domain": "amazon_shopping_list",
+    "name": "Amazon Shopping List",
+    "documentation": "https://example.com",
+    "dependencies": [],
+    "codeowners": [],
+    "requirements": ["requests", "beautifulsoup4"]
+  }

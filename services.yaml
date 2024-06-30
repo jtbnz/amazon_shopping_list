@@ -1,0 +1,6 @@
+amazon_shopping_list:
+  description: "Fetch Amazon Alexa Shopping List"
+  fields:
+    items:
+      description: "List of shopping items"
+      example: "Milk, Bread"
