@@ -16,11 +16,12 @@ def setup_service(hass: HomeAssistant):
         """Fetch the shopping list from Amazon."""
         _LOGGER.info("Fetching shopping list from Amazon")
         
-        username = hass.secrets.get("amazon_username")
-        password = hass.secrets.get("amazon_password")
+        # Read username and password from configuration
+        username = hass.data[DOMAIN]["username"]
+        password = hass.data[DOMAIN]["password"]
 
         if not username or not password:
-            _LOGGER.error("Amazon username or password not set in secrets.yaml")
+            _LOGGER.error("Amazon username or password not set in configuration.yaml")
             return
 
         login_url = "https://www.amazon.com.au/ap/signin"
@@ -65,3 +66,22 @@ def setup_service(hass: HomeAssistant):
 
     hass.services.register(DOMAIN, SERVICE_FETCH_LIST, fetch_list)
     _LOGGER.info("Amazon Shopping List service registered successfully")
+
+def setup(hass: HomeAssistant, config: dict):
+    """Set up the Amazon Shopping List component."""
+    _LOGGER.info("Setting up Amazon Shopping List component")
+    
+    try:
+        # Store the username and password in hass.data
+        hass.data[DOMAIN] = {
+            "username": config[DOMAIN].get("username"),
+            "password": config[DOMAIN].get("password")
+        }
+
+        setup_service(hass)
+        _LOGGER.info("Amazon Shopping List component setup successfully")
+    except Exception as e:
+        _LOGGER.error(f"Error setting up Amazon Shopping List component: {e}")
+        return False
+    
+    return True
