@@ -1,9 +1,9 @@
 {
-    "domain": "amazon_shopping_list",
-    "name": "Amazon Shopping List",
-    "documentation": "https://example.com",
-    "dependencies": [],
-    "codeowners": [],
-    "requirements": ["requests", "beautifulsoup4"],
-    "version": "0.1.0"
-  }
+  "domain": "amazon_shopping_list",
+  "name": "Amazon Shopping List",
+  "documentation": "https://github.com/jtbnz/amazon_shopping_list",
+  "dependencies": [],
+  "codeowners": [],
+  "requirements": ["requests", "beautifulsoup4"],
+  "version": "0.1.0"
+}
