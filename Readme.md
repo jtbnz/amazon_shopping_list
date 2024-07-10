@@ -30,7 +30,7 @@ Then in 1password move your credentials into this vault.
 
 ## Home Assistant Requirements
 
-add the integration shopping list
+add the integration shopping list https://www.home-assistant.io/integrations/shopping_list/
 ## Changes you will need to do
 
 ### dockerfile
