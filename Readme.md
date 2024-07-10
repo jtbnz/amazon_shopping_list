@@ -1,14 +1,16 @@
 ## Overview
-This container runs a nodejs script that will scrape the shopping list page off amazon.com.au (and I assume amazon.com). Note: your shopping list page is not visible in a desktop web browser but does appear in the mobile view. 
+This container runs a nodejs script that will scrape the shopping list page off amazon.com.au (and I assume amazon.com) and put it into a home assistant todo list
+
+Note: your shopping list page is not visible in a desktop web browser but does appear in the mobile view. 
 https://www.amazon.com.au/alexaquantum/sp/alexaShoppingList?ref_=list_d_wl_ys_list_1
 
-There is some extra stuff in the container like the http server as originally I tried to do it as a web page that HA read before going back to using ws to push the list in. Which is why there is a second script to push it to HA.  I have left them as separate as it was easier for testing.
+There is some extra stuff in the container like the http server as originally I tried to do it as a web page that HA read before going back to using ws to push the list in. Which is why there is a second script to push it to HA.  I have left them as separate and the http server as it was easier for testing.
 
-The list retrieved is then compared the list that is in HomeAssistant and items are added and deleted. 
+The list is retrieved and the items then compared to the list that is in HomeAssistant and items are added and deleted. 
 
-NOTE: I  intend to still use Alexa entirely for the management of the list so do not add any items into the list though home assistant
+NOTE: I intend to still use Alexa entirely for the management of the list so do not add any items into the list though home assistant
 
-Also I have a MFA one time password though 1password, if you dont have MFA on your account - and you should, then you can comment out the block in the script-otp.js that puts the password into that screen
+Also I have a MFA one time password though 1password, if you dont have MFA on your account - and you should, then you can comment out the block in the script-otp.js that puts the password into that screen, and take out the stuff in the dockerfile that installs 1password CLI
 
 The cronjob will then run every 5 minutes, scrape the list and then push it into Home Assistant.
 
