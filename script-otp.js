@@ -83,7 +83,7 @@ async function getOTPFrom1Password() {
   );
 
   // Format each item as <listItem>
-  let formattedItems = itemTitles.map(item => `<listItem>${item}</listItem>`);
+  let formattedItems = itemTitles.map(item => `${item}`);
 
   // Convert the array to JSON format
   let jsonFormattedItems = JSON.stringify(formattedItems, null, 2);
