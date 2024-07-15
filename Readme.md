@@ -16,12 +16,14 @@ you can test it by running   `node script-otp.js` and it should output your shop
 
  `
 azuser@0f5b71c0af34:~$ node script-otp.js 
+
 [
   "burro",
   "bucatini",
   "pecorino",
   "pollo"
 ]
+
 azuser@0f5b71c0af34:~$ 
 `
 
