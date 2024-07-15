@@ -25,19 +25,6 @@ RUN useradd -m -s /bin/bash azuser && echo "azuser:azuserpassword" | chpasswd &&
 RUN curl -fsSL https://deb.nodesource.com/setup_21.x | sudo -E bash - && \
     sudo apt-get install -y nodejs
 
-# Install 1Password CLI
-RUN sudo -s \
-    && curl -sS https://downloads.1password.com/linux/keys/1password.asc | \
-    gpg --dearmor --output /usr/share/keyrings/1password-archive-keyring.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/$(dpkg --print-architecture) stable main" | \
-    tee /etc/apt/sources.list.d/1password.list \
-    && mkdir -p /etc/debsig/policies/AC2D62742012EA22/ \
-    && curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol | \
-    tee /etc/debsig/policies/AC2D62742012EA22/1password.pol \
-    && mkdir -p /usr/share/debsig/keyrings/AC2D62742012EA22 \
-    && curl -sS https://downloads.1password.com/linux/keys/1password.asc | \
-    gpg --dearmor --output /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg \
-    && apt update && apt install -y 1password-cli
 
 # Install Google Chrome
 RUN sudo apt install curl gnupg -y && \
@@ -46,8 +33,7 @@ RUN sudo apt install curl gnupg -y && \
     sudo apt update && sudo apt install -y google-chrome-stable --no-install-recommends && \
     sudo rm -rf /var/lib/apt/lists/*
 
-# install the http server global
-RUN npm install -g http-server
+
 
 # Switch to user azuser
 USER azuser
@@ -56,15 +42,7 @@ WORKDIR /home/azuser
 
 # Copy the Node.js script and install necessary npm packages
 COPY --chown=azuser:azuser . .
-RUN npm install puppeteer dotenv axios ws
-
-
-# Make a directory for the HTTP server
-RUN mkdir -p /home/azuser/http
-
-# Set the environment variable for the HTTP server
-ENV HTTP_DIR=/home/azuser/http
-
+RUN npm install puppeteer axios ws otplib
 
 
 # Set up cron job - The -l is needed for the 1password credentials
@@ -80,15 +58,9 @@ RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/
     echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && \
     sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
-# Create a script to serve the file
-RUN echo "http-server /home/azuser/http -p 80 -a 0.0.0.0" > /home/azuser/start_server.sh && chmod +x /home/azuser/start_server.sh
-
-
-# Create readme.txt
-RUN echo "need to run op signin to create the connection make sure op can list the vaults" > /home/azuser/readme.txt
 
 # Expose ports
-EXPOSE 2223 8180
+EXPOSE 22
 
-# Start SSH and cron service, then start the Python server
-CMD sudo service ssh start && cron && /home/azuser/start_server.sh
+# Start SSH and cron service, 
+CMD service cron start && /usr/sbin/sshd -D

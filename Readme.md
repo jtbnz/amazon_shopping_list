@@ -10,34 +10,45 @@ The list is retrieved and the items then compared to the list that is in HomeAss
 
 NOTE: I intend to still use Alexa entirely for the management of the list so do not add any items into the list though home assistant
 
-Also I have a MFA one time password though 1password, if you dont have MFA on your account - and you should, then you can comment out the block in the script-otp.js that puts the password into that screen, and take out the stuff in the dockerfile that installs 1password CLI
-
 The cronjob will then run every 5 minutes, scrape the list and then push it into Home Assistant.
 
+you can test it by running   `node script-otp.js` and it should output your shopping list
+
+ `
+azuser@0f5b71c0af34:~$ node script-otp.js 
+[
+  "burro",
+  "bucatini",
+  "pecorino",
+  "pollo"
+]
+azuser@0f5b71c0af34:~$ 
+`
 
 
 ## Prerequisites
-### If you use 1Password
-If you use 1password for OTP read the instructions for 1password CLI https://developer.1password.com/docs/cli/get-started/ there is a bit of extra stuff around enabling OP CLI in your onepassword.  
-Open a terminal to the container and run 
-`op signin` 
-to create the connection to one password then make sure op can list the vaults
-`op vault list`
-Then create a new vault
-`op vault create ScrapeVault` 
 
-Then in 1password move your credentials into this vault.
+
 
 ## Home Assistant Requirements
 
 add the integration shopping list https://www.home-assistant.io/integrations/shopping_list/
 ## Changes you will need to do
 
+### SSH into the container
+ edit the script getmyotp.js using the secret code you get from add two step verfication 
+ - for example https://www.amazon.it/a/settings/approval/appbackup?ref=ch_adsec_addExtraApp_attempt
+
+  Change your email to your amazon account email.
+
+  Save and run the script, this should give you a otp password to verify the setup in amazon
+  `node getmyotp.js`
+
+
+
 ### dockerfile
 change and azuser and azuserpassword to something that works for you.
-### script-otp.js
-If you are using 1password OTP then change this line to your new vault and item name
-`exec('op read "op://YoursharedVaultName/ItemName/one-time password?attribute=otp"', (error, stdout, stderr) => {`
+
 
 If you are not using Amazon Australia then you will need to find your own login page:
 `await page.goto(`
@@ -46,7 +57,14 @@ If you are not using Amazon Australia then you will need to find your own login 
 
 `);`
 
+e.g. Italy is 
+
+`"https://www.amazon.it/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.it%2Fref%3Dnav_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=itflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0"`
+
+
 update the script with your amazon username and password
+
+
 
 ### updateHA.js
 update your homeassistant address
@@ -57,12 +75,13 @@ add in your token - Long-lived access tokens can be created using the **"Long-L
 
 ## Run container
 
-   `docker run -d -p 2223:22 -p 8180:80 --name amazon-scrape amazon-scrape`
+   `docker run -d -p 2224:22  --name amazon-scrape amazon-scrape`
 
 
 ## Extra things I did in the container
 Changed to my local timezone.
 `sudo ln -fs /usr/share/zoneinfo/Pacific/Auckland /etc/localtime && sudo     dpkg-reconfigure -f noninteractive tzdata`
+
 
 
 
