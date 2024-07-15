@@ -1,25 +1,23 @@
 
 const puppeteer = require("puppeteer");
 const { exec } = require('child_process');
+const OTPAuth = require('otpauth');
 const fs = require('fs');
 
+const secret = 'YOUR_SECRET_KEY';
 
-// Function to retrieve OTP from 1Password using the `op` CLI
-async function getOTPFrom1Password() {
-    return new Promise((resolve, reject) => {
-      exec('op read "op://YoursharedVaultName/ItemName/one-time password?attribute=otp"', (error, stdout, stderr) => {
-        if (error) {
-          console.error(`exec error: ${error}`);
-          return reject(error);
-        }
-        if (stderr) {
-          console.error(`stderr: ${stderr}`);
-          return reject(new Error(stderr));
-        }
-        resolve(stdout.trim()); // The OTP is in stdout
-      });
-    });
-  }
+// Create a new OTPAuth instance
+const totp = new OTPAuth.TOTP({
+  issuer: 'YourIssuer',
+  label: 'your@email.com',
+  algorithm: 'SHA1',
+  digits: 6,
+  period: 30,
+  secret: OTPAuth.Secret.fromBase32(secret)
+});
+
+// Generate OTP
+const otp = totp.generate();
 
 
 
@@ -35,8 +33,13 @@ async function getOTPFrom1Password() {
 
   // Navigate to Amazon and login
   await page.goto(
-    "https://www.amazon.com.au/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com.au%2F%3Fref_%3Dnav_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=auflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0"
+    //Australia
+     // "https://www.amazon.com.au/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com.au%2F%3Fref_%3Dnav_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=auflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0"
+    //Italy
+    "https://www.amazon.it/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.it%2Fref%3Dnav_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=itflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0"
+
   );
+
 
   // Fill in login details and click the login button
   await page.waitForSelector("#ap_email");
@@ -64,9 +67,12 @@ async function getOTPFrom1Password() {
   //await page.screenshot({ path: 'pagecontent.png', fullPage: true });
 
 
-  // Navigate to the product page for which you want to scrape reviews
+  // Navigate to the Shopping list
   await page.goto(
-    "https://www.amazon.com.au/alexaquantum/sp/alexaShoppingList?ref_=list_d_wl_ys_list_1",
+     //Australia/NZ
+     //"https://www.amazon.com.au/alexaquantum/sp/alexaShoppingList?ref_=list_d_wl_ys_list_1",
+     // Italia
+     "https://www.amazon.it/alexaquantum/sp/alexaShoppingList?ref_=list_d_wl_ys_list_1",
     { timeout: 60000 }
   ); // Replace with the product URL
 
