@@ -14,8 +14,7 @@ The cronjob will then run every 5 minutes, scrape the list and then push it into
 
 you can test it by running   `node script-otp.js` and it should output your shopping list
 
- `
-azuser@0f5b71c0af34:~$ node script-otp.js 
+ `azuser@0f5b71c0af34:~$ node script-otp.js 
 
 [
   "burro",
@@ -24,8 +23,7 @@ azuser@0f5b71c0af34:~$ node script-otp.js
   "pollo"
 ]
 
-azuser@0f5b71c0af34:~$ 
-`
+azuser@0f5b71c0af34:~$ `
 
 
 ## Prerequisites
