@@ -84,12 +84,40 @@ const otp = totp.generate();
     // seems to be a delay loading the text so have a little sleep
   });
 
-  let itemTitles = await page.$$eval(".virtual-list .item-title", items =>
-    items.map(item => item.textContent.trim())
-  );
 
-  // Format each item as <listItem>
-  let formattedItems = itemTitles.map(item => `${item}`);
+let formattedItems = [];
+let i = 0;
+let itemTitles = [];
+let scrollT = "";
+let scrollH = "";
+const scrollable_section = '.virtual-list';
+
+do {
+        await scrollDown(page, i);
+        itemTitles = await page.$$eval(".virtual-list .item-title", items => items.map(item => item.textContent.trim()) );
+        i++;
+        formattedItems.push(...itemTitles);
+        scrollH = await page.$eval('.virtual-list', el => el.scrollHeight)
+}
+while (i*500 < scrollH)
+
+async function scrollDown(page, i) {
+        const dist = i*500;
+        await page.waitForSelector('.virtual-list');
+        await page.evaluate(
+                (selector, dist) => {
+                        const scrollableSection = document.querySelector(selector);
+                        scrollableSection.scrollTop = dist;
+                },
+                scrollable_section, dist);
+        scrollT = await page.$eval('.virtual-list', el => el.scrollTop)
+};
+
+  // Deduplicate 
+  formattedItems = formattedItems.filter((item,index) => formattedItems.indexOf(item) === index);
+
+
+
 
   // Convert the array to JSON format
   let jsonFormattedItems = JSON.stringify(formattedItems, null, 2);
