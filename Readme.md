@@ -1,5 +1,7 @@
 There is a much nicer readme here! https://github.com/thiagobruch/amazon_shopping_list_scrape/
 
+If you want to run this as an home assistant addon see here https://github.com/thiagobruch/HA_Addons Thanks @thiagobruch
+
 
 ## Overview
 This container runs a nodejs script that will scrape the shopping list page off amazon.com.au (and I assume amazon.com) and put it into a home assistant todo list
