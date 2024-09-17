@@ -42,7 +42,7 @@ WORKDIR /home/azuser
 
 # Copy the Node.js script and install necessary npm packages
 COPY --chown=azuser:azuser . .
-RUN npm install puppeteer axios ws otplib
+RUN npm install puppeteer axios ws otplib otpauth
 
 
 # Set up cron job - The -l is needed for the 1password credentials
