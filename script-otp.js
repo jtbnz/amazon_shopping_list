@@ -56,7 +56,7 @@ const otp = totp.generate();
   //await page.screenshot({ path: 'pagecontent.png', fullPage: true });
 
   //------- This block can be commented out if you dont have a OTP set up - But you should!
-  const otp = await getOTPFrom1Password();
+  //const otp = await getOTPFrom1Password();
 
   await page.waitForSelector("#auth-mfa-otpcode");
   await page.type("#auth-mfa-otpcode",otp); 
