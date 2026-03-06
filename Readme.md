@@ -1,99 +1,75 @@
-There is a much nicer readme here! https://github.com/thiagobruch/amazon_shopping_list_scrape/
-
-If you want to run this as an home assistant addon see here https://github.com/thiagobruch/HA_Addons Thanks @thiagobruch
+If you want to run this as a Home Assistant addon see here: https://github.com/thiagobruch/HA_Addons Thanks @thiagobruch
 
 
 ## Overview
-This container runs a nodejs script that will scrape the shopping list page off amazon.com.au (and I assume amazon.com) and put it into a home assistant todo list
+This container runs a Node.js script that scrapes the Alexa Shopping List page on Amazon and adds new items to a Home Assistant todo list every 5 minutes (via a webhook).
 
-Note: your shopping list page is not visible in a desktop web browser but does appear in the mobile view. 
-https://www.amazon.com.au/alexaquantum/sp/alexaShoppingList?ref_=list_d_wl_ys_list_1
+The scraper handles:
+- The updated Amazon login flow (email → Continue → password — separated steps)
+- Two-step verification (TOTP/MFA) via the new `/ap/mfa` endpoint
+- CAPTCHA detection (aborts with an error rather than getting stuck)
+- Items are added to Home Assistant via a webhook; the JSON file is removed after a successful sync
 
-There is some extra stuff in the container like the http server as originally I tried to do it as a web page that HA read before going back to using ws to push the list in. Which is why there is a second script to push it to HA.  I have left them as separate and the http server as it was easier for testing.
-
-The list is retrieved and the items then compared to the list that is in HomeAssistant and items are added and deleted. 
-
-NOTE: I intend to still use Alexa entirely for the management of the list so do not add any items into the list though home assistant
-
-The cronjob will then run every 5 minutes, scrape the list and then push it into Home Assistant.
-
-you can test it by running   `node script-otp.js` and it should output your shopping list
-
- `azuser@0f5b71c0af34:~$ node script-otp.js 
-
-[
-  "burro",
-  "bucatini",
-  "pecorino",
-  "pollo"
-]
-
-azuser@0f5b71c0af34:~$ `
-
+> Note: This is a one-way sync from Amazon → Home Assistant. Items are **added** but not removed from HA.
 
 ## Prerequisites
 
+- Docker
+- A Home Assistant instance with a webhook automation (see below)
+- An Amazon account with 2-step verification enabled (strongly recommended)
 
+## Configuration
 
-## Home Assistant Requirements
+Copy `.env.example` to `.env` and fill in your values:
 
-add the integration shopping list https://www.home-assistant.io/integrations/shopping_list/
-## Changes you will need to do
+```
+AMZ_LOGIN=your-amazon-email@example.com
+AMZ_PASS=your-amazon-password
+AMZ_SECRET=YOUROTPSECRETBASE32NOSPACESHERE
+HA_WEBHOOK_URL=http://homeassistant.local:8123/api/webhook/your-webhook-id
+Amazon_Sign_in_URL=https://www.amazon.com/ap/signin?...
+Amazon_Shopping_List_Page=https://www.amazon.com/alexaquantum/sp/alexaShoppingList?ref_=list_d_wl_ys_list_1
+```
 
-### SSH into the container
- edit the script getmyotp.js using the secret code you get from add two step verfication 
- - for example https://www.amazon.it/a/settings/approval/appbackup?ref=ch_adsec_addExtraApp_attempt
+See `.env.example` for full details and example URLs for US, AU, and IT regions.
 
-  Change your email to your amazon account email.
+### Getting your OTP secret
 
-  Save and run the script, this should give you a otp password to verify the setup in amazon
-  `node getmyotp.js`
+1. Log in to Amazon → Account → Login & Security → Two-step verification → Manage (or Turn On)
+2. Under **Authenticator App**, click **Add New App**
+3. Click **"Can't scan the barcode"** and copy the key (13 groups of 4 characters)
+4. Remove all spaces — the result (`AMZ_SECRET`) looks like `ASDMASDFMSKDM...`
+5. Verify the key works by running: `node getmyotp.js` (after updating `getmyotp.js` with your secret)
 
+### Home Assistant webhook
 
+Create a webhook automation in Home Assistant that accepts a POST request and adds the `name` field to your shopping list. The webhook URL goes in `HA_WEBHOOK_URL`.
 
 ### dockerfile
-change and azuser and azuserpassword to something that works for you.
 
-
-If you are not using Amazon Australia then you will need to find your own login page:
-`await page.goto(`
-
-`"https://www.amazon.com.au/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.com.au%2F%3Fref_%3Dnav_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=auflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0"`
-
-`);`
-
-e.g. Italy is 
-
-`"https://www.amazon.it/ap/signin?openid.pape.max_auth_age=0&openid.return_to=https%3A%2F%2Fwww.amazon.it%2Fref%3Dnav_signin&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.assoc_handle=itflex&openid.mode=checkid_setup&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0"`
-
-
-update the script with your amazon username and password
-
-
-
-### updateHA.js
-update your homeassistant address
-add in your token - Long-lived access tokens can be created using the **"Long-Lived Access Tokens"** section at the bottom of a user's Home Assistant profile page - Security tab.
+Change `azuser` and `azuserpassword` to values of your choice before building.
 
 ## Build
    `docker build -t amazon-scrape .`
 
 ## Run container
 
-   `docker run -d -p 2224:22  --name amazon-scrape amazon-scrape`
+   `docker run -d -p 2224:22 --env-file .env --name amazon-scrape amazon-scrape`
 
+## Testing
 
-## Extra things I did in the container
-Changed to my local timezone.
-`sudo ln -fs /usr/share/zoneinfo/Pacific/Auckland /etc/localtime && sudo     dpkg-reconfigure -f noninteractive tzdata`
-
-
-
-
-
-HomeAssistant to-do list card configuration
+SSH into the container and run:
 
 ```
+node scrapeAmazon.js
+```
+
+This should produce a `list_of_items.json` file with your shopping list items.
+
+
+## HomeAssistant to-do list card configuration
+
+```yaml
 type: todo-list
 entity: todo.shopping_list
 card_mod:
@@ -134,5 +110,4 @@ card_mod:
         ha-card.type-todo-list .addRow {
           display: none;
         }
-
 ```

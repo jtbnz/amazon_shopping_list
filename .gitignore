@@ -1,0 +1,17 @@
+# Environment / secrets
+.env
+
+# Puppeteer session data
+tmp/
+
+# Debug screenshots and HTML dumps
+www/
+
+# Node.js dependencies
+node_modules/
+
+# Scraped output
+list_of_items.json
+
+# macOS
+.DS_Store

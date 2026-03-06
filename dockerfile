@@ -2,7 +2,9 @@
 FROM ubuntu:20.04
 
 # Set environment variables to non-interactive
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive \
+    PUPPETEER_SKIP_DOWNLOAD=1 \
+    PUPPETEER_DISABLE_HEADLESS_WARNING=true
 
 # Install required packages and create user azuser
 RUN apt-get update && apt-get install -y \
@@ -42,10 +44,10 @@ WORKDIR /home/azuser
 
 # Copy the Node.js script and install necessary npm packages
 COPY --chown=azuser:azuser . .
-RUN npm install puppeteer axios ws otplib otpauth
+RUN npm install puppeteer-core dotenv otpauth axios
 
 
-# Set up cron job - The -l is needed for the 1password credentials
+# Set up cron job
 RUN (crontab -l 2>/dev/null; echo "*/5 * * * * bash -l /home/azuser/scrape.sh ") | crontab -
 
 
